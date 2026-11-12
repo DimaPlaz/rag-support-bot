@@ -5,6 +5,7 @@ description = "RAG support bot: answers from a knowledge base on a website widge
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "alembic>=1.20.1",
+    "anthropic>=2.8.0",
     "asyncpg>=0.32.0",
     "beautifulsoup4>=4.15.0",
     "fastapi>=0.162.5",

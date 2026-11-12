@@ -63,6 +63,21 @@ def fake_embedder() -> FakeEmbedder:
     return FakeEmbedder()
 
 
+class VocabEmbedder(FakeEmbedder):
+    """Вектор — наличие слов из словаря: близость текстов предсказуема в тестах поиска."""
+
+    def __init__(self, vocabulary: list[str]) -> None:
+        super().__init__()
+        self._vocabulary = vocabulary
+
+    def _vector(self, text: str) -> list[float]:
+        lowered = text.lower()
+        vector = [1.0 if word in lowered else 0.0 for word in self._vocabulary]
+        # маленькая общая компонента, чтобы вектор не был нулевым
+        vector.append(0.01)
+        return vector + [0.0] * (EMBEDDING_DIM - len(vector))
+
+
 async def _prepare_database(url: str) -> None:
     admin_engine = create_async_engine(
         make_url(url).set(database="postgres"), isolation_level="AUTOCOMMIT"
@@ -94,10 +109,19 @@ def test_database_url() -> Iterator[str]:
 
 
 @pytest.fixture
-async def db_session(test_database_url: str) -> AsyncIterator[AsyncSession]:
+async def db_sessions(test_database_url: str) -> AsyncIterator[async_sessionmaker[AsyncSession]]:
     engine = create_async_engine(test_database_url)
     async with engine.begin() as connection:
-        await connection.execute(text("TRUNCATE documents, chunks RESTART IDENTITY CASCADE"))
-    async with async_sessionmaker(engine, expire_on_commit=False)() as session:
-        yield session
+        await connection.execute(
+            text("TRUNCATE documents, chunks, conversations, messages RESTART IDENTITY CASCADE")
+        )
+    yield async_sessionmaker(engine, expire_on_commit=False)
     await engine.dispose()
+
+
+@pytest.fixture
+async def db_session(
+    db_sessions: async_sessionmaker[AsyncSession],
+) -> AsyncIterator[AsyncSession]:
+    async with db_sessions() as session:
+        yield session
