@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>{% block title %}Admin{% endblock %} · BoxHub Support</title>
+  <link rel="stylesheet" href="/static/admin.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="/admin">BoxHub <span>Support admin</span></a>
+      <nav class="tabs">
+        <a href="/admin" {% if active == "overview" %}aria-current="page"{% endif %}>Overview</a>
+        <a href="/admin/unanswered" {% if active == "unanswered" %}aria-current="page"{% endif %}>Unanswered</a>
+        <a href="/admin/conversations" {% if active == "conversations" %}aria-current="page"{% endif %}>Conversations</a>
+        <a href="/admin/documents" {% if active == "documents" %}aria-current="page"{% endif %}>Documents</a>
+        <a class="site-link" href="/" target="_blank" rel="noopener">Open site ↗</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

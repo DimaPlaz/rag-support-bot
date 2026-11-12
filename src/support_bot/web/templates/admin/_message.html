@@ -1,0 +1,26 @@
+{# Карточка вопроса и ответа. Нужны: message, conversation (или None), show_link #}
+<article class="message-card {{ message.status }}">
+  <div class="message-meta">
+    <span class="when">{{ message.created_at | when }}</span>
+    {% if conversation %}<span class="pill">{{ conversation.channel }}</span>{% endif %}
+    {% if message.status == "unanswered" %}
+      <span class="pill warn">Unanswered · {{ reasons.get(message.handoff_reason, message.handoff_reason) }}</span>
+    {% else %}
+      <span class="pill ok">Answered</span>
+    {% endif %}
+    {% if message.model %}<span class="cost" title="{{ message.input_tokens }} in / {{ message.output_tokens }} out tokens">{{ message.cost_usd | usd }} · {{ message.input_tokens + message.output_tokens }} tok</span>{% endif %}
+    {% if show_link and conversation %}<a class="open" href="/admin/conversations/{{ conversation.id }}">Open conversation →</a>{% endif %}
+  </div>
+  <div class="qa">
+    <div class="q"><span class="label">Q</span><p>{{ message.question }}</p></div>
+    <div class="a"><span class="label">A</span><p>{{ message.answer }}</p></div>
+  </div>
+  {% if message.sources %}
+  <div class="sources">Sources:
+    {% for source in message.sources %}
+      {% if source.url %}<a class="source" href="{{ source.url }}" target="_blank" rel="noopener noreferrer">{{ source.title }}</a>
+      {% else %}<span class="source">{{ source.title }}</span>{% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+</article>

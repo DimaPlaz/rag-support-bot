@@ -39,6 +39,10 @@ class Settings(BaseSettings):
     tg_polling_enabled: bool = False
     public_base_url: str = "http://localhost:8000"
 
+    admin_username: str = "admin"
+    # Без пароля админка выключена (404): пароля по умолчанию нет намеренно.
+    admin_password: SecretStr | None = None
+
     rate_limit_ip_per_minute: int = 20
     rate_limit_session_per_minute: int = 10
 

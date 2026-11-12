@@ -1,0 +1,45 @@
+{% extends "admin/base.html" %}
+{% block title %}Documents{% endblock %}
+{% block content %}
+<h1>Knowledge base</h1>
+{% if notice %}<div class="notice {{ level }}" role="status">{{ notice }}</div>{% endif %}
+
+<form class="upload" method="post" action="/admin/documents" enctype="multipart/form-data">
+  <h2>Add a document</h2>
+  <div class="upload-grid">
+    <label><span>File <span class="muted">(Markdown, TXT or PDF, up to {{ max_upload_mb }} MB)</span></span>
+      <input type="file" name="file" accept=".md,.markdown,.txt,.pdf">
+    </label>
+    <div class="or">or</div>
+    <label>Web page URL
+      <input type="url" name="url" placeholder="https://example.com/faq">
+    </label>
+  </div>
+  <button type="submit">Upload and index</button>
+  <p class="muted small">Uploading the same content again does not create duplicates. A changed file with the same name replaces the old version.</p>
+</form>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Title</th><th>Type</th><th>Source</th><th class="num">Chunks</th><th>Updated</th></tr>
+    </thead>
+    <tbody>
+      {% for document, chunks in documents %}
+      <tr>
+        <td>{{ document.title }}</td>
+        <td><span class="pill">{{ document.source_type }}</span></td>
+        <td class="source-cell">
+          {% if document.source_type == "url" %}<a href="{{ document.source }}" target="_blank" rel="noopener noreferrer">{{ document.source }}</a>
+          {% else %}<code>{{ document.source }}</code>{% endif %}
+        </td>
+        <td class="num">{{ chunks }}</td>
+        <td class="nowrap">{{ document.updated_at | when }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="empty">No documents yet. Upload one above or run <code>kb ingest data/kb/</code>.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ "Unanswered" if unanswered_only else "Conversations" }}{% endblock %}
+{% block content %}
+<h1>{{ "Unanswered questions" if unanswered_only else "Conversation log" }}</h1>
+<p class="muted">
+  {% if unanswered_only %}
+    Questions the bot passed to an operator: nothing relevant was found in the knowledge base, or the AI could not answer. Each one is a gap worth adding to the documents.
+  {% else %}
+    Every question and answer from the website widget and Telegram, newest first.
+  {% endif %}
+  {{ total }} total.
+</p>
+{% for message, conversation in rows %}
+  {% set show_link = true %}
+  {% include "admin/_message.html" %}
+{% else %}
+  <p class="empty">{{ "No unanswered questions. 🎉" if unanswered_only else "No conversations yet." }}</p>
+{% endfor %}
+{% if pages > 1 %}
+<nav class="pager">
+  {% if page > 1 %}<a href="?page={{ page - 1 }}">← Newer</a>{% endif %}
+  <span>Page {{ page }} of {{ pages }}</span>
+  {% if page < pages %}<a href="?page={{ page + 1 }}">Older →</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

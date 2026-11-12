@@ -1,13 +1,8 @@
-from pathlib import Path
-
 from fastapi import APIRouter, Request
 from fastapi.responses import FileResponse, HTMLResponse
-from fastapi.templating import Jinja2Templates
 
-WEB_DIR = Path(__file__).resolve().parent.parent / "web"
-STATIC_DIR = WEB_DIR / "static"
+from support_bot.web.templating import STATIC_DIR, templates
 
-templates = Jinja2Templates(directory=WEB_DIR / "templates")
 router = APIRouter()
 
 # Цены Northgate из data/kb/pricing.md — витрина демо-страницы.

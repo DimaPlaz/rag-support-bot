@@ -1,8 +1,15 @@
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select, true
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from support_bot.db.models import Channel, Chunk, Conversation, Document, Message
+from support_bot.db.models import (
+    Channel,
+    Chunk,
+    Conversation,
+    Document,
+    Message,
+    MessageStatus,
+)
 
 
 async def get_document_by_hash(session: AsyncSession, content_hash: str) -> Document | None:
@@ -50,3 +57,44 @@ async def recent_messages(session: AsyncSession, conversation_id: int, limit: in
         .limit(limit)
     )
     return list(reversed(rows.all()))
+
+
+async def list_documents(session: AsyncSession) -> list[tuple[Document, int]]:
+    """Документы с числом чанков, свежие первыми."""
+    chunk_count = func.count(Chunk.id)
+    rows = await session.execute(
+        select(Document, chunk_count)
+        .outerjoin(Chunk, Chunk.document_id == Document.id)
+        .group_by(Document.id)
+        .order_by(Document.updated_at.desc(), Document.id.desc())
+    )
+    return [(document, count) for document, count in rows]
+
+
+async def list_messages(
+    session: AsyncSession, *, unanswered_only: bool, limit: int, offset: int
+) -> tuple[list[tuple[Message, Conversation]], int]:
+    """Сообщения с диалогами, новые первыми, и общее число для пагинации."""
+    condition = Message.status == MessageStatus.UNANSWERED if unanswered_only else true()
+    total = await session.scalar(select(func.count(Message.id)).where(condition)) or 0
+    rows = await session.execute(
+        select(Message, Conversation)
+        .join(Conversation, Conversation.id == Message.conversation_id)
+        .where(condition)
+        .order_by(Message.id.desc())
+        .limit(limit)
+        .offset(offset)
+    )
+    return [(message, conversation) for message, conversation in rows], total
+
+
+async def get_conversation(
+    session: AsyncSession, conversation_id: int
+) -> tuple[Conversation, list[Message]] | None:
+    conversation = await session.get(Conversation, conversation_id)
+    if conversation is None:
+        return None
+    messages = await session.scalars(
+        select(Message).where(Message.conversation_id == conversation_id).order_by(Message.id)
+    )
+    return conversation, list(messages)

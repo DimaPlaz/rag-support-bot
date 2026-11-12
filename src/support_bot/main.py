@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from support_bot.api import chat, health, pages
+from support_bot.api import admin, chat, health, pages
 from support_bot.cache import redis_client
 from support_bot.config import get_settings
 from support_bot.db.session import engine
@@ -16,6 +16,7 @@ from support_bot.services.answer import get_answer_service
 from support_bot.services.rate_limit import get_rate_limiter
 from support_bot.telegram.client import get_bot
 from support_bot.telegram.dispatcher import create_dispatcher
+from support_bot.web.templating import STATIC_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +75,8 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(chat.router)
     app.include_router(pages.router)
-    app.mount("/static", StaticFiles(directory=pages.STATIC_DIR), name="static")
+    app.include_router(admin.router)
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
     return app
 
 

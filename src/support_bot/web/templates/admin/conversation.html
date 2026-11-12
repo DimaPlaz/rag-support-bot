@@ -1,0 +1,16 @@
+{% extends "admin/base.html" %}
+{% block title %}Conversation #{{ conversation.id }}{% endblock %}
+{% block content %}
+<p><a href="/admin/conversations">← All conversations</a></p>
+<h1>Conversation #{{ conversation.id }}</h1>
+<p class="muted">
+  <span class="pill">{{ conversation.channel }}</span>
+  Session <code>{{ conversation.session_id }}</code> · started {{ conversation.created_at | when }} · {{ messages | length }} question{{ "" if messages | length == 1 else "s" }}
+</p>
+{% for message in messages %}
+  {% set show_link = false %}
+  {% include "admin/_message.html" %}
+{% else %}
+  <p class="empty">No messages in this conversation.</p>
+{% endfor %}
+{% endblock %}

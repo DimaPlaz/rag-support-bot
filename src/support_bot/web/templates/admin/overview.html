@@ -1,0 +1,41 @@
+{% extends "admin/base.html" %}
+{% block title %}Overview{% endblock %}
+{% block content %}
+<h1>Overview</h1>
+<section class="tiles">
+  <div class="tile">
+    <div class="tile-label">Questions</div>
+    <div class="tile-value">{{ stats.total }}</div>
+    <div class="tile-note">Website {{ stats.by_channel["web"] }} · Telegram {{ stats.by_channel["telegram"] }}</div>
+  </div>
+  <div class="tile {% if stats.unanswered %}attention{% endif %}">
+    <div class="tile-label">Without an answer</div>
+    <div class="tile-value">{{ stats.unanswered_percent }}%</div>
+    <div class="tile-note">{{ stats.unanswered }} of {{ stats.total }} passed to an operator</div>
+  </div>
+  <div class="tile">
+    <div class="tile-label">AI cost</div>
+    <div class="tile-value">{{ stats.total_cost | usd }}</div>
+    <div class="tile-note">Avg per AI answer {{ stats.average_cost | usd }}</div>
+  </div>
+  <div class="tile">
+    <div class="tile-label">Knowledge base</div>
+    <div class="tile-value">{{ stats.documents }}</div>
+    <div class="tile-note">documents · {{ stats.chunks }} chunks</div>
+  </div>
+</section>
+<p class="muted small">Tokens used: {{ "{:,}".format(stats.input_tokens) }} input · {{ "{:,}".format(stats.output_tokens) }} output.</p>
+
+<div class="section-head">
+  <h2>Latest unanswered questions</h2>
+  <a href="/admin/unanswered">See all →</a>
+</div>
+{% if latest %}
+  {% for message, conversation in latest %}
+    {% set show_link = true %}
+    {% include "admin/_message.html" %}
+  {% endfor %}
+{% else %}
+  <p class="empty">No unanswered questions. 🎉</p>
+{% endif %}
+{% endblock %}

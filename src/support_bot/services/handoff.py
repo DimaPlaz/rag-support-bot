@@ -48,7 +48,7 @@ class MessageSender(Protocol):
     async def send_message(self, chat_id: int, text: str) -> Any: ...
 
 
-_REASONS = {
+REASON_LABELS = {
     HandoffReason.NO_CONTEXT: "no relevant documents found",
     HandoffReason.NOT_FOUND: "the answer is not in the knowledge base",
     HandoffReason.REFUSAL: "the model declined to answer",
@@ -59,7 +59,9 @@ _REASONS = {
 
 def operator_message(conversation: Conversation, message: Message, base_url: str) -> str:
     reason = (
-        _REASONS.get(message.handoff_reason, "unknown") if message.handoff_reason else "unknown"
+        REASON_LABELS.get(message.handoff_reason, "unknown")
+        if message.handoff_reason
+        else "unknown"
     )
     url = f"{base_url.rstrip('/')}/admin/conversations/{conversation.id}"
     question = message.question if len(message.question) <= 1500 else message.question[:1500] + "…"

@@ -1,4 +1,5 @@
 import asyncio
+import io
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -83,8 +84,32 @@ async def load_url(url: str, http_client: httpx.AsyncClient) -> LoadedDocument:
     )
 
 
-def _read_pdf(path: Path) -> tuple[str | None, str]:
-    reader = PdfReader(path)
+async def load_upload(filename: str, content: bytes) -> LoadedDocument:
+    """Файл, загруженный через админку. Источник — upload/<имя файла>."""
+    name = Path(filename).name or "document"
+    source_type = FILE_TYPES.get(Path(name).suffix.lower())
+    if source_type is None:
+        raise UnsupportedSourceError(f"Unsupported file type: {Path(name).suffix or name}")
+
+    if source_type is SourceType.PDF:
+        title, text = await asyncio.to_thread(_read_pdf, io.BytesIO(content))
+    else:
+        try:
+            text = content.decode("utf-8-sig")
+        except UnicodeDecodeError as error:
+            raise UnsupportedSourceError("Text files must be UTF-8 encoded") from error
+        title = _markdown_title(text) if source_type is SourceType.MARKDOWN else None
+
+    return LoadedDocument(
+        source=f"upload/{name}",
+        source_type=source_type,
+        title=title or _title_from_filename(Path(name)),
+        text=_normalize(text),
+    )
+
+
+def _read_pdf(source: Path | io.BytesIO) -> tuple[str | None, str]:
+    reader = PdfReader(source)
     text = "\n\n".join(page.extract_text() or "" for page in reader.pages)
     title = reader.metadata.title if reader.metadata else None
     return title or _first_line(text), text
