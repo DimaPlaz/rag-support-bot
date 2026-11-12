@@ -1,0 +1,40 @@
+# Продакшен: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# Наружу открыт только Caddy (80/443), БД, Redis и API доступны лишь внутри сети compose.
+services:
+  db:
+    ports: !reset []
+    restart: unless-stopped
+
+  redis:
+    ports: !reset []
+    restart: unless-stopped
+
+  api:
+    ports: !reset []
+    restart: unless-stopped
+    # --proxy-headers: rate limit видит IP клиента из X-Forwarded-For, а не адрес Caddy.
+    # Доверять всем адресам безопасно: порт API не опубликован, к нему ходит только Caddy.
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn support_bot.main:app --host 0.0.0.0 --port 8000
+             --proxy-headers --forwarded-allow-ips='*'"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+
+volumes:
+  caddy_data:
+  caddy_config:
