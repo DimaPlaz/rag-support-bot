@@ -10,6 +10,11 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
     log_level: str = "INFO"
 
+    embedding_model: str = "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
+    embedding_cache_dir: str | None = None
+    chunk_size: int = 1000
+    chunk_overlap: int = 150
+
 
 @lru_cache
 def get_settings() -> Settings:

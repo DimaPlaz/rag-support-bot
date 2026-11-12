@@ -6,6 +6,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from support_bot.config import get_settings
+from support_bot.db import models  # noqa: F401  регистрирует таблицы в metadata
 from support_bot.db.base import Base
 
 config = context.config
@@ -15,9 +16,14 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 
+def database_url() -> str:
+    # Тесты передают URL тестовой БД через sqlalchemy.url, иначе берём из Settings.
+    return config.get_main_option("sqlalchemy.url") or get_settings().database_url
+
+
 def run_migrations_offline() -> None:
     context.configure(
-        url=get_settings().database_url,
+        url=database_url(),
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -33,7 +39,7 @@ def do_run_migrations(connection: Connection) -> None:
 
 
 async def run_migrations_online() -> None:
-    engine = create_async_engine(get_settings().database_url)
+    engine = create_async_engine(database_url())
     async with engine.connect() as connection:
         await connection.run_sync(do_run_migrations)
     await engine.dispose()

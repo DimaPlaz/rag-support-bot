@@ -6,12 +6,20 @@ requires-python = ">=3.12,<3.13"
 dependencies = [
     "alembic>=1.20.1",
     "asyncpg>=0.32.0",
+    "beautifulsoup4>=4.15.0",
     "fastapi>=0.162.5",
+    "fastembed>=0.9.1",
+    "httpx>=0.28.1",
+    "pgvector>=0.5.1",
     "pydantic-settings>=2.16.2",
+    "pypdf>=7.0.1",
     "redis>=8.1.0",
     "sqlalchemy[asyncio]>=2.1.8",
     "uvicorn[standard]>=0.54.0",
 ]
+
+[project.scripts]
+kb = "support_bot.cli:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -26,6 +34,8 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "SIM", "ASYNC", "RUF"]
+# Комментарии и докстринги в проекте на русском: кириллица — не опечатка.
+ignore = ["RUF001", "RUF002", "RUF003"]
 
 [tool.pyright]
 pythonVersion = "3.12"
@@ -40,7 +50,6 @@ testpaths = ["tests"]
 
 [dependency-groups]
 dev = [
-    "httpx>=0.28.1",
     "pyright>=1.1.414",
     "pytest>=9.2.0",
     "pytest-asyncio>=1.5.0",

@@ -18,6 +18,7 @@ Python 3.12, uv, FastAPI, PostgreSQL + pgvector, SQLAlchemy 2 (async) + Alembic,
 src/support_bot/
   main.py            # FastAPI app: API, виджет, демо-страница, админка
   bot.py             # точка входа Telegram-бота
+  cli.py             # `kb ingest <path|url>` (скрипт kb в pyproject)
   config.py          # Settings (pydantic-settings), всё из .env
   api/               # роуты FastAPI: chat (SSE), admin, health
   telegram/          # aiogram: роутеры, тексты
@@ -26,7 +27,6 @@ src/support_bot/
   llm/               # клиент Anthropic, промпты, расчёт стоимости
   db/                # модели, репозитории, сессия
   web/               # widget.js, шаблоны, статика
-cli.py               # `kb ingest <path|url>`
 data/kb/             # база знаний BoxHub
 migrations/
 tests/
@@ -39,6 +39,7 @@ uv sync
 docker compose up -d db redis
 uv run alembic upgrade head
 uv run kb ingest data/kb/
+docker compose run --rm api kb ingest data/kb/   # то же внутри Docker
 uv run uvicorn support_bot.main:app --reload
 uv run python -m support_bot.bot
 uv run pytest
