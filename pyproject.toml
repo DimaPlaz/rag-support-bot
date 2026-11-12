@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "RAG support bot: answers from a knowledge base on a website widget and in Telegram"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "aiogram>=3.31.0",
     "alembic>=1.20.1",
     "anthropic>=2.8.0",
     "asyncpg>=0.32.0",

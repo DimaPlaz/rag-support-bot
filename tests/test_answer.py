@@ -17,7 +17,13 @@ from support_bot.db.models import (
     MessageStatus,
     SourceType,
 )
-from support_bot.llm.client import Completion, LLMError, LLMEvent, TextDelta
+from support_bot.llm.client import (
+    AnthropicLLMClient,
+    Completion,
+    LLMError,
+    LLMEvent,
+    TextDelta,
+)
 from support_bot.llm.pricing import TokenUsage
 from support_bot.rag.loaders import LoadedDocument
 from support_bot.rag.search import search_chunks
@@ -297,3 +303,25 @@ async def test_notifier_failure_does_not_break_answer(
 
     assert not done.answered
     assert await db_session.scalar(select(Message.status)) is MessageStatus.UNANSWERED
+
+
+class _BrokenMessages:
+    def stream(self, **kwargs: Any) -> Any:
+        raise TypeError("Could not resolve authentication method")
+
+
+class _BrokenAnthropic:
+    messages = _BrokenMessages()
+
+
+async def test_any_llm_client_failure_becomes_llm_error() -> None:
+    client = AnthropicLLMClient(
+        _BrokenAnthropic(),  # type: ignore[arg-type]
+        model="claude-opus-5-5",
+        effort="low",
+        max_tokens=100,
+    )
+
+    with pytest.raises(LLMError):
+        async for _ in client.stream(system="s", messages=[], schema={}):
+            pass

@@ -17,7 +17,7 @@ Python 3.12, uv, FastAPI, PostgreSQL + pgvector, SQLAlchemy 2 (async) + Alembic,
 ```
 src/support_bot/
   main.py            # FastAPI app: API, виджет, демо-страница, админка
-  bot.py             # точка входа Telegram-бота
+  bot.py             # отдельный запуск Telegram-бота (обычно бот работает внутри API, см. ниже)
   cli.py             # `kb ingest <path|url>` (скрипт kb в pyproject)
   config.py          # Settings (pydantic-settings), всё из .env
   api/               # роуты FastAPI: chat (SSE), admin, health
@@ -32,6 +32,7 @@ migrations/
 tests/
 ```
 Веб-роуты и хендлеры Telegram тонкие. Логика ответа одна на оба канала — в `services/answer.py`.
+Telegram-бот по умолчанию опрашивает Telegram внутри процесса API (`TG_POLLING_ENABLED=true` в docker compose), чтобы не держать в памяти вторую копию модели эмбеддингов (~1.6 ГБ). Одновременно может работать только один поллер на токен.
 
 ## Команды
 ```bash
@@ -41,7 +42,7 @@ uv run alembic upgrade head
 uv run kb ingest data/kb/
 docker compose run --rm api kb ingest data/kb/   # то же внутри Docker
 uv run uvicorn support_bot.main:app --reload
-uv run python -m support_bot.bot
+uv run python -m support_bot.bot   # бот отдельно; только если контейнер api не запущен
 uv run pytest
 uv run ruff check . && uv run ruff format . && uv run pyright
 ```

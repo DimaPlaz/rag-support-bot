@@ -26,11 +26,18 @@ class Settings(BaseSettings):
     llm_timeout_seconds: float = 60.0
 
     rag_top_k: int = 5
-    rag_min_similarity: float = 0.35
+    rag_min_similarity: float = 0.30
     history_messages: int = 6
 
     # Домены сайтов, где подключён виджет (JSON-список), например ["https://boxhub.example"]
     cors_origins: list[str] = []
+
+    tg_bot_token: SecretStr | None = None
+    tg_operator_chat_id: int | None = None
+    # Polling внутри процесса API. Включать только в одном запущенном процессе:
+    # два поллера с одним токеном получают от Telegram ошибку 409.
+    tg_polling_enabled: bool = False
+    public_base_url: str = "http://localhost:8000"
 
     rate_limit_ip_per_minute: int = 20
     rate_limit_session_per_minute: int = 10

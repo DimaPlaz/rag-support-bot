@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,6 +12,10 @@ from support_bot.cache import redis_client
 from support_bot.config import get_settings
 from support_bot.db.session import engine
 from support_bot.rag.embeddings import get_embedder
+from support_bot.services.answer import get_answer_service
+from support_bot.services.rate_limit import get_rate_limiter
+from support_bot.telegram.client import get_bot
+from support_bot.telegram.dispatcher import create_dispatcher
 
 logger = logging.getLogger(__name__)
 
@@ -23,12 +27,34 @@ async def _warm_up_embedder() -> None:
         logger.exception("Embedding model warm-up failed")
 
 
+async def _run_telegram_polling() -> None:
+    bot = get_bot()
+    if bot is None:
+        logger.warning("TG_POLLING_ENABLED is set, but TG_BOT_TOKEN is empty")
+        return
+    dispatcher = create_dispatcher(get_answer_service(), get_rate_limiter())
+    try:
+        await dispatcher.start_polling(bot, handle_signals=False, close_bot_session=False)
+    except Exception:
+        logger.exception("Telegram polling stopped")
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     # Модель эмбеддингов грузится несколько секунд — прогреваем в фоне, чтобы не ждал первый вопрос.
     warmup = asyncio.create_task(_warm_up_embedder())
+    # Бот живёт в процессе API, чтобы не держать в памяти вторую копию модели (~1.6 ГБ).
+    polling = (
+        asyncio.create_task(_run_telegram_polling()) if get_settings().tg_polling_enabled else None
+    )
     yield
     warmup.cancel()
+    if polling is not None:
+        polling.cancel()
+        with suppress(asyncio.CancelledError):
+            await polling
+    if (bot := get_bot()) is not None:
+        await bot.session.close()
     await redis_client.aclose()
     await engine.dispose()
 

@@ -65,7 +65,9 @@ class AnthropicLLMClient:
                     if event.type == "text":
                         yield TextDelta(event.text)
                 message = await stream.get_final_message()
-        except anthropic.APIError as error:
+        except Exception as error:
+            # Не только APIError: без ключа SDK бросает TypeError ещё до запроса.
+            # Любой сбой вызова должен заканчиваться handoff, а не потерянным вопросом.
             raise LLMError(f"{type(error).__name__}: {error}") from error
 
         usage = message.usage

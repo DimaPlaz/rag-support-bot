@@ -24,7 +24,13 @@ from support_bot.llm.pricing import TokenUsage, calculate_cost
 from support_bot.llm.prompts import ANSWER_SCHEMA, SYSTEM_PROMPT, ModelAnswer, build_user_message
 from support_bot.rag.embeddings import Embedder, get_embedder
 from support_bot.rag.search import FoundChunk, search_chunks
-from support_bot.services.handoff import HandoffNotifier, LogNotifier, handoff_text
+from support_bot.services.handoff import (
+    HandoffNotifier,
+    LogNotifier,
+    TelegramNotifier,
+    handoff_text,
+)
+from support_bot.telegram.client import get_bot
 
 logger = logging.getLogger(__name__)
 
@@ -276,8 +282,16 @@ def _sources(chunks: Sequence[FoundChunk], source_ids: Sequence[int]) -> list[So
     return list(sources.values())
 
 
+def _notifier(settings: Settings) -> HandoffNotifier:
+    bot = get_bot()
+    if bot is None or settings.tg_operator_chat_id is None:
+        return LogNotifier()
+    return TelegramNotifier(bot, settings.tg_operator_chat_id, settings.public_base_url)
+
+
 @lru_cache
 def get_answer_service() -> AnswerService:
+    settings = get_settings()
     return AnswerService(
-        session_factory, get_embedder(), get_llm_client(), LogNotifier(), get_settings()
+        session_factory, get_embedder(), get_llm_client(), _notifier(settings), settings
     )
