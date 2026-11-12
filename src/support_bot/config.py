@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     rag_min_similarity: float = 0.35
     history_messages: int = 6
 
+    # Домены сайтов, где подключён виджет (JSON-список), например ["https://boxhub.example"]
+    cors_origins: list[str] = []
+
     rate_limit_ip_per_minute: int = 20
     rate_limit_session_per_minute: int = 10
 

@@ -4,8 +4,10 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
-from support_bot.api import chat, health
+from support_bot.api import chat, health, pages
 from support_bot.cache import redis_client
 from support_bot.config import get_settings
 from support_bot.db.session import engine
@@ -32,10 +34,21 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 
 def create_app() -> FastAPI:
-    logging.basicConfig(level=get_settings().log_level)
+    settings = get_settings()
+    logging.basicConfig(level=settings.log_level)
     app = FastAPI(title="BoxHub Support Bot", lifespan=lifespan)
+    if settings.cors_origins:
+        # Нужен, только если виджет подключают на сайте с другим доменом.
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=settings.cors_origins,
+            allow_methods=["POST"],
+            allow_headers=["Content-Type"],
+        )
     app.include_router(health.router)
     app.include_router(chat.router)
+    app.include_router(pages.router)
+    app.mount("/static", StaticFiles(directory=pages.STATIC_DIR), name="static")
     return app
 
 

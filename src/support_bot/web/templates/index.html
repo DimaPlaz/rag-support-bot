@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BoxHub Self-Storage</title>
+  <meta name="description" content="Demo of an AI support bot for a fictional self-storage company.">
+  <link rel="stylesheet" href="/static/demo.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 3 4 7v10l8 4 8-4V7z' fill='%231f6f5c'/%3E%3C/svg%3E">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav">
+      <a class="logo" href="/">
+        <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M12 3 4 7v10l8 4 8-4V7l-8-4Z" fill="currentColor"/><path d="m4 7 8 4 8-4M12 11v10" fill="none" stroke="#fff" stroke-width="1.4"/></svg>
+        BoxHub
+      </a>
+      <nav>
+        <a href="#sizes">Sizes &amp; prices</a>
+        <a href="#why">Why BoxHub</a>
+        <a href="#ask">Ask us</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <p class="eyebrow">Self-storage in Riverside &amp; Northgate</p>
+          <h1>Space for your things.<br>Answers for your questions, 24/7.</h1>
+          <p class="lead">Clean, secure units from 1 to 15 m², rented month to month. Not sure which size you need or how access works? Our assistant answers right away — and hands tricky questions to a person.</p>
+          <div class="actions">
+            <button class="button primary" type="button" data-ask="">Chat with our assistant</button>
+            <a class="button ghost" href="#sizes">See prices</a>
+          </div>
+        </div>
+        <div class="hero-card" aria-hidden="true">
+          <div class="mini-chat">
+            <div class="mini user">Can I store a motorcycle?</div>
+            <div class="mini bot">Yes — in L and XL units at BoxHub Northgate, with an empty fuel tank and a disconnected battery.</div>
+            <div class="mini-source">Source: Storage Rules</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sizes" class="section">
+      <div class="container">
+        <h2>Sizes &amp; monthly prices</h2>
+        <p class="section-lead">Prices from our Northgate facility. Riverside units are fully climate-controlled.</p>
+        <div class="sizes">
+          {% for unit in units %}
+          <article class="size-card">
+            <div class="size-badge">{{ unit.size }}</div>
+            <div class="size-area">{{ unit.area }}</div>
+            <p>{{ unit.fits }}</p>
+            <div class="price">from <strong>${{ unit.price }}</strong>/mo</div>
+          </article>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section id="why" class="section alt">
+      <div class="container features">
+        <div class="feature">
+          <h3>Access every day</h3>
+          <p>From 6:00 to 23:00 with your personal code, 24/7 access available at Riverside.</p>
+        </div>
+        <div class="feature">
+          <h3>Secure by default</h3>
+          <p>24/7 CCTV, alarms and gated entry. Only your padlock opens your unit.</p>
+        </div>
+        <div class="feature">
+          <h3>No long contracts</h3>
+          <p>Rent for a month or longer, and save up to 15% when you prepay.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="ask" class="section">
+      <div class="container ask">
+        <h2>Ask our assistant</h2>
+        <p class="section-lead">It answers from BoxHub's documents and shows where the answer came from. Try one of these — in English or any other language:</p>
+        <div class="questions">
+          {% for question in questions %}
+          <button class="question" type="button" data-ask="{{ question }}">{{ question }}</button>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      BoxHub Self-Storage is a fictional company. This page is a demo of an AI support bot with retrieval-augmented answers.
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener("click", (event) => {
+      const trigger = event.target.closest("[data-ask]");
+      if (trigger && window.BoxHubChat) window.BoxHubChat.open(trigger.dataset.ask);
+    });
+  </script>
+  <script src="/widget.js" defer></script>
+</body>
+</html>
