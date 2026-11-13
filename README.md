@@ -70,6 +70,7 @@ All settings come from `.env`. See [`.env.example`](.env.example) for the full l
 | Variable | Purpose |
 |---|---|
 | `ANTHROPIC_API_KEY`, `LLM_MODEL`, `LLM_EFFORT` | Claude access, model (default `claude-opus-5-5`) and effort level |
+| `LLM_PROVIDER`, `LLM_BASE_URL` | `anthropic` (default) or `openai` to reach Claude through an OpenAI-compatible proxy |
 | `RAG_TOP_K`, `RAG_MIN_SIMILARITY` | How many chunks to retrieve, and the similarity below which the bot hands off without calling the LLM |
 | `ADMIN_USERNAME`, `ADMIN_PASSWORD` | Basic auth for `/admin`. Without a password the admin panel is disabled |
 | `TG_BOT_TOKEN`, `TG_OPERATOR_CHAT_ID`, `TG_POLLING_ENABLED` | Telegram bot and operator notifications |

@@ -62,6 +62,7 @@ uv run ruff check . && uv run ruff format . && uv run pyright
 
 ## LLM
 - Только официальный Anthropic SDK (`anthropic`). Перед написанием кода работы с API используй скилл `claude-api`, не пиши вызовы по памяти.
+- Исключение (решение владельца): `LLM_PROVIDER=openai` — Claude через OpenAI-совместимый прокси (Hostman AI) на SDK `openai`, `OpenAICompatLLMClient` в `llm/client.py`. Он отдаёт те же события и `stop_reason`, что и клиент Anthropic; сервис ответа о провайдере не знает.
 - Модель — из `LLM_MODEL` в `.env`, не хардкодить.
 - Всегда проверяй `stop_reason` (`refusal`, `max_tokens`) до чтения ответа. Ошибка или отказ — вежливое сообщение и handoff.
 - Промпты — в `llm/prompts.py`, отдельно от кода. Тон — вежливая поддержка, ответ на языке вопроса.

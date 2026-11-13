@@ -12,3 +12,9 @@ def test_cost_for_opus() -> None:
 
 def test_unknown_model_has_no_cost() -> None:
     assert calculate_cost("some-unknown-model", TokenUsage(input_tokens=10)) is None
+
+
+def test_cost_for_model_with_provider_prefix() -> None:
+    usage = TokenUsage(input_tokens=1000)
+
+    assert calculate_cost("anthropic/claude-opus-5-5", usage) == Decimal("0.004000")

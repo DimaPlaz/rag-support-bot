@@ -35,7 +35,8 @@ PRICES: dict[str, ModelPrice] = {
 
 def calculate_cost(model: str, usage: TokenUsage) -> Decimal | None:
     """Стоимость вызова в $; None, если цена модели неизвестна."""
-    price = PRICES.get(model)
+    # прокси называют модель с префиксом провайдера: anthropic/claude-opus-5-5
+    price = PRICES.get(model.rpartition("/")[2])
     if price is None:
         return None
     total = (

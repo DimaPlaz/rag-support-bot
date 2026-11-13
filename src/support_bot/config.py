@@ -5,6 +5,7 @@ from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 Effort = Literal["low", "medium", "high", "xhigh", "max"]
+LLMProvider = Literal["anthropic", "openai"]
 
 
 class Settings(BaseSettings):
@@ -19,7 +20,10 @@ class Settings(BaseSettings):
     chunk_size: int = 1000
     chunk_overlap: int = 150
 
+    # anthropic — Anthropic API; openai — OpenAI-совместимый прокси (например Hostman AI)
+    llm_provider: LLMProvider = "anthropic"
     anthropic_api_key: SecretStr | None = None
+    llm_base_url: str | None = None
     llm_model: str = "claude-opus-5-5"
     llm_effort: Effort = "low"
     llm_max_tokens: int = 8000
