@@ -6,7 +6,7 @@ The demo company is **BoxHub Self-Storage**, a fictional storage-unit rental bus
 
 **Live demo:** https://153-52-101-226.sslip.io · Telegram: [@BoxHubSupportBot](https://t.me/BoxHubSupportBot)
 
-**Demo video (1 min):** [docs/demo.mp4](docs/demo.mp4). A streamed answer with sources, a follow-up question, a Russian question, a handoff, and the admin panel.
+**Demo video (1 min):** [docs/demo.mp4](docs/demo.mp4). A streamed answer with sources, a follow-up question, a Russian question, a handoff, and the admin panel, with captions and sound.
 
 ![BoxHub demo page with the chat widget](docs/screenshots/landing.png)
 
