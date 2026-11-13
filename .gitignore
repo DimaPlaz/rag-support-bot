@@ -224,3 +224,4 @@ __marimo__/
 
 # fastembed model cache
 .cache/
+.DS_Store
