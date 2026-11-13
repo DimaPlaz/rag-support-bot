@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     llm_max_tokens: int = 8000
     llm_timeout_seconds: float = 60.0
 
-    rag_top_k: int = 5
+    rag_top_k: int = 8
     rag_min_similarity: float = 0.30
     history_messages: int = 6
 

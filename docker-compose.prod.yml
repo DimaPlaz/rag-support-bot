@@ -14,10 +14,13 @@ services:
     restart: unless-stopped
     # --proxy-headers: rate limit видит IP клиента из X-Forwarded-For, а не адрес Caddy.
     # Доверять всем адресам безопасно: порт API не опубликован, к нему ходит только Caddy.
-    command: >
-      sh -c "alembic upgrade head &&
-             uvicorn support_bot.main:app --host 0.0.0.0 --port 8000
-             --proxy-headers --forwarded-allow-ips='*'"
+    command:
+      - sh
+      - -c
+      - >-
+        alembic upgrade head &&
+        exec uvicorn support_bot.main:app --host 0.0.0.0 --port 8000
+        --proxy-headers --forwarded-allow-ips='*'
 
   caddy:
     image: caddy:2-alpine
